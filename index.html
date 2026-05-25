@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>💌 ถึงคนพิเศษ</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: #000;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  cursor: pointer;
+}
+
+canvas {
+  position: fixed;
+  top:0; left:0;
+  pointer-events: none;
+}
+
+/* หน้าจอเริ่ม */
+#intro {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: radial-gradient(ellipse at center, #1a0010 0%, #000 100%);
+  transition: opacity 1.5s ease;
+}
+
+#intro h1 {
+  font-size: 22px;
+  color: #ffffff88;
+  letter-spacing: 4px;
+  margin-bottom: 30px;
+  animation: fadeUp 2s ease forwards;
+}
+
+#start-btn {
+  padding: 16px 48px;
+  background: linear-gradient(135deg, #ff0066, #ff69b4);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 0 30px #ff006688;
+  animation: fadeUp 2.5s ease forwards, glowPulse 2s ease-in-out infinite;
+  letter-spacing: 2px;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(20px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 30px #ff006688; }
+  50%     { box-shadow: 0 0 60px #ff0066cc; }
+}
+
+/* เนื้อหาหลัก */
+#main {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 2s ease;
+  pointer-events: none;
+}
+
+#main.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.card {
+  background: #ffffff08;
+  border: 1px solid #ff69b444;
+  border-radius: 30px;
+  padding: 50px 45px;
+  max-width: 480px;
+  text-align: center;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 80px #ff006633;
+  animation: cardFloat 4s ease-in-out infinite;
+}
+
+@keyframes cardFloat {
+  0%,100% { transform: translateY(0px); }
+  50%     { transform: translateY(-10px); }
+}
+
+.heart-big {
+  font-size: 80px;
+  animation: heartbeat 1.2s ease-in-out infinite;
+  display: block;
+  margin-bottom: 10px;
+}
+
+@keyframes heartbeat {
+  0%,100% { transform: scale(1); }
+  14%     { transform: scale(1.2); }
+  28%     { transform: scale(1); }
+  42%     { transform: scale(1.1); }
+  56%     { transform: scale(1); }
+}
+
+.name {
+  font-size: 32px;
+  color: #ff69b4;
+  font-weight: bold;
+  text-shadow: 0 0 20px #ff69b488;
+  margin-bottom: 6px;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%,100% { text-shadow: 0 0 20px #ff69b488; color: #ff69b4; }
+  50%     { text-shadow: 0 0 40px #ff006688; color: #ff9999; }
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #ffffff44;
+  letter-spacing: 3px;
+  margin-bottom: 30px;
+}
+
+.message {
+  color: #ffffffcc;
+  font-size: 17px;
+  line-height: 2;
+  margin-bottom: 30px;
+}
+
+.message span {
+  color: #ff69b4;
+  font-weight: bold;
+}
+
+.since {
+  font-size: 13px;
+  color: #ffffff44;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+}
+
+/* ปุ่มดนตรี */
+#music-btn {
+  padding: 10px 28px;
+  background: #ff006622;
+  border: 1px solid #ff006666;
+  border-radius: 50px;
+  color: #ff69b4;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 1px;
+}
+
+#music-btn:hover {
+  background: #ff006644;
+  box-shadow: 0 0 20px #ff006644;
+}
+
+/* นับวัน */
+.counter {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.counter-item {
+  text-align: center;
+}
+
+.counter-num {
+  font-size: 36px;
+  font-weight: bold;
+  color: #ff69b4;
+  text-shadow: 0 0 15px #ff69b4;
+  display: block;
+}
+
+.counter-label {
+  font-size: 11px;
+  color: #ffffff44;
+  letter-spacing: 2px;
+}
+
+/* ข้อความ slide */
+#slide-msg {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff33;
+  font-size: 13px;
+  letter-spacing: 2px;
+  z-index: 20;
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,100% { opacity: 0.3; }
+  50%     { opacity: 0.8; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- หน้าเริ่ม -->
+<div id="intro">
+  <h1>✉️ &nbsp; มีบางอย่างอยากบอก</h1>
+  <button id="start-btn" onclick="start()">แตะเพื่อเปิด 💌</button>
+</div>
+
+<!-- เนื้อหาหลัก -->
+<div id="main">
+  <div class="card">
+    <span class="heart-big">💗</span>
+    <div class="name">ถึงคนที่รัก</div>
+    <div class="subtitle">· · · · ·</div>
+
+    <div class="counter" id="counter"></div>
+
+    <div class="message">
+      ทุกวันที่มีเธออยู่ข้างๆ<br>
+      มันทำให้รู้สึกว่า<br>
+      โลกใบนี้มันดีขึ้นมากเลยนะ<br><br>
+      ขอบคุณที่เป็น<span> คนพิเศษ</span>ของฉัน<br>
+      ขอบคุณที่ทำให้ฉัน<span>ยิ้ม</span>ทุกวัน<br><br>
+      <span>รักเธอมากๆ เลยนะ 💕</span>
+    </div>
+
+    <div class="since" id="since-text"></div>
+
+    <button id="music-btn" onclick="toggleMusic()">🎵 เปิดเพลง</button>
+  </div>
+</div>
+
+<div id="slide-msg">แตะหน้าจอเพื่อสร้างหัวใจ ✨</div>
+
+<script>
+// ===== ตั้งค่าตรงนี้ =====
+const PARTNER_NAME = "ที่รัก";       // ← ใส่ชื่อแฟน
+const START_DATE = "2024-02-14";     // ← วันที่เริ่มคบ (ปี-เดือน-วัน)
+// =========================
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// หัวใจลอย
+let hearts = [];
+function spawnHeart(x, y, big = false) {
+  hearts.push({
+    x: x || Math.random() * canvas.width,
+    y: y || canvas.height + 20,
+    size: big ? Math.random() * 30 + 20 : Math.random() * 15 + 8,
+    speed: Math.random() * 1.5 + 0.5,
+    opacity: Math.random() * 0.6 + 0.4,
+    swing: Math.random() * 2 - 1,
+    swingSpeed: Math.random() * 0.02 + 0.01,
+    angle: 0,
+    color: ['#ff69b4','#ff0066','#ff99cc','#ffb3d9','#ff3385'][Math.floor(Math.random()*5)]
+  });
+}
+
+function drawHeart(x, y, size, color, opacity) {
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x, y - size/2, x - size, y - size/2, x - size, y);
+  ctx.bezierCurveTo(x - size, y + size * 0.6, x, y + size * 1.2, x, y + size * 1.2);
+  ctx.bezierCurveTo(x, y + size * 1.2, x + size, y + size * 0.6, x + size, y);
+  ctx.bezierCurveTo(x + size, y - size/2, x, y - size/2, x, y);
+  ctx.fill();
+  ctx.restore();
+}
+
+// ดาว/แสงระยิบ
+let sparkles = [];
+function spawnSparkle(x, y) {
+  for (let i = 0; i < 8; i++) {
+    sparkles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 4,
+      vy: (Math.random() - 0.5) * 4,
+      life: 1,
+      size: Math.random() * 4 + 2,
+      color: ['#ff69b4','#ffcc00','#ffffff','#ff99cc'][Math.floor(Math.random()*4)]
+    });
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // หัวใจ
+  hearts = hearts.filter(h => h.y > -50 && h.opacity > 0);
+  hearts.forEach(h => {
+    h.angle += h.swingSpeed;
+    h.x += Math.sin(h.angle) * h.swing;
+    h.y -= h.speed;
+    h.opacity -= 0.002;
+    drawHeart(h.x, h.y, h.size, h.color, h.opacity);
+  });
+
+  // sparkles
+  sparkles = sparkles.filter(s => s.life > 0);
+  sparkles.forEach(s => {
+    s.x += s.vx; s.y += s.vy;
+    s.life -= 0.03;
+    ctx.save();
+    ctx.globalAlpha = s.life;
+    ctx.fillStyle = s.color;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// spawn หัวใจอัตโนมัติ
+setInterval(() => { if (started) spawnHeart(); }, 400);
+
+// คลิกสร้างหัวใจ
+let started = false;
+document.addEventListener('click', e => {
+  if (!started) return;
+  spawnHeart(e.clientX, e.clientY, true);
+  spawnSparkle(e.clientX, e.clientY);
+});
+
+// เริ่ม
+function start() {
+  started = true;
+  document.getElementById('intro').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('main').classList.add('show');
+    // spawn หัวใจเพิ่มเยอะๆ ตอนเปิด
+    for (let i = 0; i < 30; i++) {
+      setTimeout(() => spawnHeart(), i * 80);
+    }
+  }, 1500);
+
+  document.querySelector('.name').textContent = '💌 ถึง' + PARTNER_NAME;
+  updateCounter();
+}
+
+// นับวัน
+function updateCounter() {
+  const start = new Date(START_DATE);
+  const now = new Date();
+  const diff = now - start;
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+  const secs = Math.floor((diff % (1000*60)) / 1000);
+
+  document.getElementById('counter').innerHTML = `
+    <div class="counter-item"><span class="counter-num">${days}</span><span class="counter-label">วัน</span></div>
+    <div class="counter-item"><span class="counter-num">${hours}</span><span class="counter-label">ชั่วโมง</span></div>
+    <div class="counter-item"><span class="counter-num">${mins}</span><span class="counter-label">นาที</span></div>
+    <div class="counter-item"><span class="counter-num">${secs}</span><span class="counter-label">วินาที</span></div>
+  `;
+
+  document.getElementById('since-text').textContent =
+    '💑 เราอยู่ด้วยกันมาแล้ว ' + days + ' วัน';
+
+  setTimeout(updateCounter, 1000);
+}
+
+// เพลง (ใช้ Web Audio สร้างเสียงง่ายๆ)
+let musicPlaying = false;
+let musicNodes = [];
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playNote(freq, start, dur, vol=0.1) {
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  o.type = 'sine';
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0, audioCtx.currentTime + start);
+  g.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + start + 0.05);
+  g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + start + dur);
+  o.start(audioCtx.currentTime + start);
+  o.stop(audioCtx.currentTime + start + dur + 0.1);
+  musicNodes.push(o);
+}
+
+function playMelody() {
+  const notes = [
+    [523,0],[659,0.4],[784,0.8],[659,1.2],
+    [523,1.6],[440,2.0],[494,2.4],[523,2.8],
+    [587,3.2],[659,3.6],[784,4.0],[880,4.4],
+    [784,4.8],[659,5.2],[523,5.6],[440,6.0],
+  ];
+  notes.forEach(([f,t]) => playNote(f, t, 0.35, 0.08));
+}
+
+function toggleMusic() {
+  const btn = document.getElementById('music-btn');
+  if (!musicPlaying) {
+    musicPlaying = true;
+    btn.textContent = '🎵 หยุดเพลง';
+    playMelody();
+    setTimeout(() => { if (musicPlaying) playMelody(); }, 6500);
+  } else {
+    musicPlaying = false;
+    btn.textContent = '🎵 เปิดเพลง';
+    musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
+    musicNodes = [];
+  }
+}
+</script>
+</body>
+</html>
